@@ -49,11 +49,67 @@ describe('Page model', function() {
 
     describe('Methods', function() {
         describe('findSimilar', function() {
-            it('never gets itself', function() {
-
+            it('never gets itself', function(done) {
+              var pageId;
+                Page.findOne({title: 'foo'})
+                .then(function(page){
+                  pageId = page._id.toString();
+                  //console.log(pageId);
+                  return page.findSimilar();
+                })
+                .then(function(pages){
+                  var pageIds = pages.map(function(item){
+                    return item._id.toString();
+                  });
+                  //console.log(pageIds);
+                  expect(pageIds.indexOf(pageId)).to.equal(-1);
+                  done();
+                });
             });
-            xit('gets other pages with any common tags', function() {});
-            xit('does not get other pages without any common tags', function() {});
+            it('gets other pages with any common tags', function(done) {
+              var numPages, pageId;
+                Page.findOne({title: 'foo'})
+                .then(function(page){
+                  pageId = page._id.toString();
+                  //console.log(pageId);
+                  return page.findSimilar();
+                })
+                .then(function(pages){
+                  numPages = pages.length;
+                  return Page.find({
+                    tags: {$in : ['foo', 'bar']},
+                    _id: { $ne: pageId}
+                  });
+                })
+                .then(function(pages){
+                  expect(numPages).to.equal(pages.length);
+                  done();
+                })
+                .catch(function(err){
+                  console.log(err);
+                });
+            });
+            it('does not get other pages without any common tags', function() {
+              var origTags;
+                Page.findOne({title: 'foo'})
+                .then(function(page){
+                  origTags = page.tags;
+                  //console.log(pageId);
+                  return page.findSimilar();
+                })
+                .then(function(pages){
+                  var numPages = pages.length;
+                  var filteredPages = pages.filter(function(page){
+                    return page.tags.some(function(tag){
+                      return origTags.indexOf(tag) > -1;
+                    });
+                  });
+                  //console.log(filteredPages);
+                  expect(filteredPages.length).to.equal(numPages);
+                  //console.log(pageIds);
+                  done();
+                });
+            });
         });
     });
 
