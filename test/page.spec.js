@@ -115,12 +115,28 @@ describe('Page model', function() {
 
     describe('Virtuals', function() {
         describe('route', function() {
-            xit('returns the url_name prepended by "/wiki/"', function() {});
+            it('returns the url_name prepended by "/wiki/"', function(done) {
+              Page.findOne()
+              .then(function(page){
+                expect('/wiki/'+page.urlTitle).to.equal(page.route);
+                done();
+              })
+            });
         });
     });
 
     describe('Hooks', function() {
-        xit('it sets urlTitle based on title before validating', function() {});
+        it('it sets urlTitle based on title before validating', function(done) {
+          var page = new Page({title:"The Great 100!",
+            content:"Very interesting stuff"
+          });
+          page.validate()
+          .then(function(){
+            var title = page.title.replace(/\s/g, '_').replace(/\W/g, '');
+            expect(page.urlTitle).to.equal(title);
+          })
+          done();
+        });
     });
 
 });
