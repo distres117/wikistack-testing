@@ -5,6 +5,17 @@ var User = require('../models').User;
 var Page = require('../models').Page;
 chai.use(spies);
 
+before(function(){
+    return Page.create({
+      title: 'foo',
+      content: 'bar',
+      tags: ['foo', 'bar']
+    });
+})
+
+after(function(){
+  return Page.remove();
+})
 describe('Page model', function() {
     var page;
     describe('Validations', function() {
@@ -25,13 +36,6 @@ describe('Page model', function() {
 
     describe('Statics', function() {
         describe('findByTag', function() {
-          beforeEach(function(done){
-            Page.create({
-              title: 'foo',
-              content: 'bar',
-              tags: ['foo', 'bar']
-            }, done);
-          });
             it('gets pages with the search tag', function() {
               Page.findByTag('foo')
               .then(function(pages){
